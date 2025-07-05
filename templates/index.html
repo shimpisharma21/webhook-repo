@@ -15,36 +15,28 @@
     async function fetchEvents() {
       const res = await fetch('/events');
       const evts = await res.json();
-      document.getElementById('list').innerHTML =
-        evts.map(e => {
-          const t = new Date(e.timestamp*1000)
-                        .toLocaleString('en-IN');
-          if (e.type === 'push') {
-            return `<div class="evt">
-                      <strong>${e.author}</strong>
-                      pushed to <em>${e.to_branch}</em>
-                      on ${t}
-                    </div>`;
-          } else if (e.type === 'pull_request') {
-            return `<div class="evt">
-                      <strong>${e.author}</strong>
-                      opened PR from <em>${e.from_branch}</em>
-                      to <em>${e.to_branch}</em>
-                      on ${t}
-                    </div>`;
-          } else if (e.type === 'merge') {
-            return `<div class="evt">
-                      <strong>${e.author}</strong>
-                      merged <em>${e.from_branch}</em>
-                      into <em>${e.to_branch}</em>
-                      on ${t}
-                    </div>`;
-          }
-        }).join('');
+      document.getElementById('list').innerHTML = evts.map(e => {
+        const t = new Date(e.timestamp * 1000).toLocaleString();
+        if (e.type === 'push') {
+          return `<div class="evt"><strong>${e.author}</strong>
+                    pushed to <em>${e.to_branch}</em> on ${t}</div>`;
+        }
+        if (e.type === 'pull_request' && e.action === 'opened') {
+          return `<div class="evt"><strong>${e.author}</strong>
+                    opened PR from <em>${e.from_branch}</em> to <em>${e.to_branch}</em> on ${t}</div>`;
+        }
+        if (e.type === 'pull_request' && e.action === 'closed') {
+          return `<div class="evt"><strong>${e.author}</strong>
+                    closed PR from <em>${e.from_branch}</em> to <em>${e.to_branch}</em> on ${t}</div>`;
+        }
+        return `<div class="evt"><strong>${e.author}</strong>
+                  did ${e.type} (${e.action || '—'}) on ${t}</div>`;
+      }).join('');
     }
     fetchEvents();
-    setInterval(fetchEvents, 1000);
+    setInterval(fetchEvents, 5000);
   </script>
+
 </body>
 </html>
 
