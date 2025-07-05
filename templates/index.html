@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>GitHub Events</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
+    .evt { padding: .5rem; border-bottom: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h1>Recent GitHub Events</h1>
+  <div id="list"></div>
+  <script>
+    async function fetchEvents() {
+      const res = await fetch('/events');
+      const evts = await res.json();
+      document.getElementById('list').innerHTML =
+        evts.map(e => {
+          const t = new Date(e.timestamp*1000)
+                        .toLocaleString('en-IN');
+          if (e.type === 'push') {
+            return `<div class="evt">
+                      <strong>${e.author}</strong>
+                      pushed to <em>${e.to_branch}</em>
+                      on ${t}
+                    </div>`;
+          } else if (e.type === 'pull_request') {
+            return `<div class="evt">
+                      <strong>${e.author}</strong>
+                      opened PR from <em>${e.from_branch}</em>
+                      to <em>${e.to_branch}</em>
+                      on ${t}
+                    </div>`;
+          } else if (e.type === 'merge') {
+            return `<div class="evt">
+                      <strong>${e.author}</strong>
+                      merged <em>${e.from_branch}</em>
+                      into <em>${e.to_branch}</em>
+                      on ${t}
+                    </div>`;
+          }
+        }).join('');
+    }
+    fetchEvents();
+    setInterval(fetchEvents, 1000);
+  </script>
+</body>
+</html>
+
