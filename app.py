@@ -33,15 +33,18 @@ def webhook():
             print(
                 "⚠️  No signature header — skipping verification (test mode)")
 
-        # Minimal payload extraction
+
+        # Minimal payload extraction (updated to match new webhook payload)
         evt = request.json or {}
         doc = {
-            "type": evt.get("action", "unknown"),
-            "author": evt.get("author") or evt.get("sender", {}).get("login"),
-            "from_branch": evt.get("from_branch", ""),
-            "to_branch": evt.get("to_branch", ""),
-            "timestamp": time.time()
+            "type":        evt.get("event_type"),    # "push" or "pull_request"
+            "action":      evt.get("pr_action"),     # "opened"/"closed" or ""
+            "from_branch": evt.get("from_branch"),   # e.g. "feature-xyz"
+            "to_branch":   evt.get("to_branch"),     # e.g. "main"
+            "author":      evt.get("author"),        # GitHub username
+            "timestamp":   time.time()
         }
+
         print("→ Inserting:", doc)
         col.insert_one(doc)
         return "", 204
